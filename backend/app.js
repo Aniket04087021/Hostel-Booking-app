@@ -10,7 +10,7 @@ dotenv.config({ path: "./config.env" });
 
 app.use(
   cors({
-    origin: "https://hostel-booking-app-eosin.vercel.app",
+    origin: 'http://localhost:5173',
     methods: ["POST"],
     credentials: true,
   })
