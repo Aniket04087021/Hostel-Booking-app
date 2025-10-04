@@ -12,7 +12,7 @@ dotenv.config({ path: "./config.env" });
 const allowedOrigins = [
   "http://localhost:5173", // local dev
   "http://localhost:5174", // if using Vite default port
-  "https://hostel-booking-app-eosin.vercel.app" // deployed frontend
+  "https://hostel-booking-app-jdda.vercel.app/" // deployed frontend
 ];
 
 app.use(
