@@ -14,7 +14,7 @@ const Reservation = () => {
   const navigate = useNavigate();
 
   // ✅ Use environment variable (Best Practice)
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://hostel-booking-app-2.onrender.com/api/v1";
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://hostel-booking-app-3.onrender.com/api/v1";
 
   const handleReservation = async (e) => {
     e.preventDefault();
