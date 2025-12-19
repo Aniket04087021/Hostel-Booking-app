@@ -3,25 +3,30 @@ import { HiOutlineArrowNarrowRight } from "react-icons/hi";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Reservation = () => {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [phone, setPhone] = useState("");
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
 
   // ✅ Use environment variable (Best Practice)
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://hostel-booking-app-3.onrender.com/api/v1";
 
   const handleReservation = async (e) => {
     e.preventDefault();
+    
+    if (!user) {
+      toast.error("Please login to make a reservation");
+      navigate("/login");
+      return;
+    }
+
     try {
       const { data } = await axios.post(
         `${API_BASE_URL}/reservation/send`,
-        { firstName, lastName, email, phone, date, time },
+        { date, time },
         {
           headers: {
             "Content-Type": "application/json",
@@ -30,18 +35,50 @@ const Reservation = () => {
         }
       );
       toast.success(data.message);
-      setFirstName("");
-      setLastName("");
-      setPhone("");
-      setEmail("");
       setTime("");
       setDate("");
       navigate("/success");
     } catch (error) {
       console.error(error);
-      toast.error(error.response?.data?.message || "Something went wrong");
+      if (error.response?.status === 401) {
+        toast.error("Please login to make a reservation");
+        navigate("/login");
+      } else {
+        toast.error(error.response?.data?.message || "Something went wrong");
+      }
     }
   };
+
+  if (loading) {
+    return (
+      <section className="reservation" id="reservation">
+        <div className="container">
+          <div className="loading">Loading...</div>
+        </div>
+      </section>
+    );
+  }
+
+  if (!user) {
+    return (
+      <section className="reservation" id="reservation">
+        <div className="container">
+          <div className="banner">
+            <img src="/reservation.png" alt="res" />
+          </div>
+          <div className="banner">
+            <div className="reservation_form_box">
+              <h1>MAKE A RESERVATION</h1>
+              <p>Please login to make a reservation</p>
+              <button onClick={() => navigate("/login")} style={{ marginTop: "20px" }}>
+                Go to Login
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="reservation" id="reservation">
@@ -52,24 +89,8 @@ const Reservation = () => {
         <div className="banner">
           <div className="reservation_form_box">
             <h1>MAKE A RESERVATION</h1>
-            <p>For Further Questions, Please Call</p>
+            <p>Welcome, {user.firstName}! Select your preferred date and time.</p>
             <form onSubmit={handleReservation}>
-              <div>
-                <input
-                  type="text"
-                  placeholder="First Name"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Last Name"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  required
-                />
-              </div>
               <div>
                 <input
                   type="date"
@@ -84,22 +105,10 @@ const Reservation = () => {
                   required
                 />
               </div>
-              <div>
-                <input
-                  type="email"
-                  placeholder="Email"
-                  className="email_tag"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-                <input
-                  type="number"
-                  placeholder="Phone"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  required
-                />
+              <div style={{ marginTop: "10px", fontSize: "0.9rem", color: "#666" }}>
+                <p>Reservation will be made for:</p>
+                <p><strong>{user.firstName} {user.lastName}</strong></p>
+                <p>{user.email} | {user.phone}</p>
               </div>
               <button type="submit">
                 RESERVE NOW{" "}

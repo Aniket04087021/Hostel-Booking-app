@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useAuth } from "../../context/AuthContext";
 import "./Admin.css";
 
 const Admin = () => {
   const [reservations, setReservations] = useState([]);
   const [filteredReservations, setFilteredReservations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user, isAdmin, loading: authLoading, logout } = useAuth();
+  const navigate = useNavigate();
   
   // Filter states
   const [filterYear, setFilterYear] = useState("");
@@ -22,8 +26,15 @@ const Admin = () => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://hostel-booking-app-3.onrender.com/api/v1";
 
   useEffect(() => {
-    fetchReservations();
-  }, []);
+    if (!authLoading) {
+      if (!user || !isAdmin) {
+        toast.error("Admin access required");
+        navigate("/admin/login");
+        return;
+      }
+      fetchReservations();
+    }
+  }, [user, isAdmin, authLoading, navigate]);
 
   const fetchReservations = async () => {
     try {
@@ -162,19 +173,44 @@ const Admin = () => {
     }
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="admin-container">
-        <div className="loading">Loading reservations...</div>
+        <div className="loading">Loading...</div>
       </div>
     );
+  }
+
+  if (!user || !isAdmin) {
+    return null; // Will redirect
   }
 
   return (
     <div className="admin-container">
       <div className="admin-header">
-        <h1>Admin Dashboard - Booking Requests</h1>
-        <p>Manage all restaurant reservation requests</p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+          <div>
+            <h1>Admin Dashboard - Booking Requests</h1>
+            <p>Manage all restaurant reservation requests</p>
+          </div>
+          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            <span style={{ fontSize: "0.9rem", color: "#666" }}>Welcome, {user.firstName}</span>
+            <button 
+              onClick={logout}
+              style={{
+                padding: "8px 16px",
+                background: "#dc3545",
+                color: "white",
+                border: "none",
+                borderRadius: "5px",
+                cursor: "pointer",
+                fontSize: "0.9rem"
+              }}
+            >
+              Logout
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Filters Section */}

@@ -70,12 +70,22 @@ nav .menuBtn {
   border: 1px solid #333;
   border-radius: 20px;
   font-size: 16px;
+  cursor: pointer;
 }
 nav .menuBtn:hover {
   color: #fff;
   background: #222;
   transition: 0.3s;
-  cursor: pointer;
+}
+nav .auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+nav .user-name {
+  font-size: 14px;
+  color: #555;
+  font-weight: 500;
 }
 nav .hamburger {
   display: none;

@@ -3,13 +3,27 @@ import { Reservation } from "../models/reservation.js";
 
 
 const send_reservation = async (req, res, next) => {
-  const { firstName, lastName, email, date, time, phone } = req.body;
-  if (!firstName || !lastName || !email || !date || !time || !phone) {
-    return next(new ErrorHandler("Please Fill Full Reservation Form!", 400));
+  const { date, time } = req.body;
+  
+  // User is authenticated, get info from req.user
+  if (!req.user) {
+    return next(new ErrorHandler("Please login to make a reservation", 401));
+  }
+
+  if (!date || !time) {
+    return next(new ErrorHandler("Please provide date and time!", 400));
   }
 
   try {
-    await Reservation.create({ firstName, lastName, email, date, time, phone });
+    await Reservation.create({ 
+      firstName: req.user.firstName,
+      lastName: req.user.lastName,
+      email: req.user.email,
+      phone: req.user.phone,
+      date, 
+      time,
+      user: req.user._id 
+    });
     res.status(201).json({
       success: true,
       message: "Reservation Sent Successfully!",

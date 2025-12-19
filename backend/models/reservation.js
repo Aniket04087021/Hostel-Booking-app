@@ -38,6 +38,11 @@ const reservationSchema = new mongoose.Schema({
     enum: ["pending", "accepted", "declined"],
     default: "pending",
   },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
 });
 
 export const Reservation = mongoose.model("Reservation", reservationSchema);

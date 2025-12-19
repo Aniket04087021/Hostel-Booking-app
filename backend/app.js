@@ -1,8 +1,10 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import { errorMiddleware } from "./middlewares/error.js";
 import reservationRouter from "./routes/reservationRoute.js";
+import authRouter from "./routes/authRoute.js";
 import { dbConnection } from "./database/dbConnection.js";
 
 const app = express();
@@ -31,7 +33,9 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
+app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/reservation", reservationRouter);
 
 app.get("/", (req, res) => {
