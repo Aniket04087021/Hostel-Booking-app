@@ -27,5 +27,47 @@ const send_reservation = async (req, res, next) => {
 };
 
 
+const get_all_reservations = async (req, res, next) => {
+  try {
+    const reservations = await Reservation.find().sort({ createdAt: -1 });
+    res.status(200).json({
+      success: true,
+      reservations,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+const update_reservation_status = async (req, res, next) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!status || !["pending", "accepted", "declined"].includes(status)) {
+    return next(new ErrorHandler("Invalid status. Must be pending, accepted, or declined", 400));
+  }
+
+  try {
+    const reservation = await Reservation.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true, runValidators: true }
+    );
+
+    if (!reservation) {
+      return next(new ErrorHandler("Reservation not found", 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Reservation ${status} successfully!`,
+      reservation,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 export default send_reservation;
+export { get_all_reservations, update_reservation_status };
 

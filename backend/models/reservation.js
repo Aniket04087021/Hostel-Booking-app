@@ -33,6 +33,11 @@ const reservationSchema = new mongoose.Schema({
     minLength: [10, "Phone number must contain 10 Digits."],
     maxLength: [10, "Phone number must contain 10 Digits."],
   },
+  status: {
+    type: String,
+    enum: ["pending", "accepted", "declined"],
+    default: "pending",
+  },
 });
 
 export const Reservation = mongoose.model("Reservation", reservationSchema);
