@@ -113,13 +113,132 @@
   color: #999;
 }
 
+.filter-results-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px solid #e0e0e0;
+}
+
 .filter-results-count {
-  text-align: right;
   font-size: 0.9rem;
   color: #666;
   font-weight: 500;
-  padding-top: 10px;
+}
+
+.records-per-page-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.records-per-page-group label {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.records-per-page-select {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  font-family: "Oswald", sans-serif;
+  color: #333;
+  background-color: #fff;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.records-per-page-select:focus {
+  outline: none;
+  border-color: #222;
+  box-shadow: 0 0 0 2px rgba(34, 34, 34, 0.1);
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
   border-top: 1px solid #e0e0e0;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.pagination-info {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pagination-btn {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #fff;
+  color: #333;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-family: "Oswald", sans-serif;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #222;
+  color: #fff;
+  border-color: #222;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-pages {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.pagination-page-btn {
+  min-width: 35px;
+  height: 35px;
+  padding: 0 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #fff;
+  color: #333;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-family: "Oswald", sans-serif;
+}
+
+.pagination-page-btn:hover {
+  background-color: #f8f9fa;
+  border-color: #222;
+}
+
+.pagination-page-btn.active {
+  background-color: #222;
+  color: #fff;
+  border-color: #222;
+}
+
+.pagination-ellipsis {
+  padding: 0 5px;
+  color: #666;
+  font-size: 0.9rem;
 }
 
 .loading,
@@ -286,9 +405,30 @@
     gap: 15px;
   }
 
+  .filter-results-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
   .filter-results-count {
     text-align: left;
-    margin-top: 10px;
+  }
+
+  .records-per-page-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pagination-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pagination-controls {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
   }
 
   .reservations-table th,

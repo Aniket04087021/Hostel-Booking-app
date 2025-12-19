@@ -13,6 +13,10 @@ const Admin = () => {
   const [filterMonth, setFilterMonth] = useState("");
   const [filterDate, setFilterDate] = useState("");
   const [filterName, setFilterName] = useState("");
+  
+  // Pagination states
+  const [recordsPerPage, setRecordsPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Use environment variable or fallback to hosted backend
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://hostel-booking-app-3.onrender.com/api/v1";
@@ -121,6 +125,30 @@ const Admin = () => {
     setFilterMonth("");
     setFilterDate("");
     setFilterName("");
+    setCurrentPage(1); // Reset to first page when clearing filters
+  };
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredReservations.length / recordsPerPage);
+  const startIndex = (currentPage - 1) * recordsPerPage;
+  const endIndex = startIndex + recordsPerPage;
+  const paginatedReservations = filteredReservations.slice(startIndex, endIndex);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterYear, filterMonth, filterDate, filterName, recordsPerPage]);
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Handle records per page change
+  const handleRecordsPerPageChange = (e) => {
+    setRecordsPerPage(Number(e.target.value));
+    setCurrentPage(1);
   };
 
   const getStatusBadgeClass = (status) => {
@@ -223,8 +251,24 @@ const Admin = () => {
               />
             </div>
           </div>
-          <div className="filter-results-count">
-            Showing {filteredReservations.length} of {reservations.length} reservations
+          <div className="filter-results-row">
+            <div className="filter-results-count">
+              Showing {filteredReservations.length} of {reservations.length} reservations
+            </div>
+            <div className="records-per-page-group">
+              <label htmlFor="records-per-page">Records per page:</label>
+              <select
+                id="records-per-page"
+                value={recordsPerPage}
+                onChange={handleRecordsPerPageChange}
+                className="records-per-page-select"
+              >
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
           </div>
         </div>
       )}
@@ -255,7 +299,7 @@ const Admin = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredReservations.map((reservation) => (
+              {paginatedReservations.map((reservation) => (
                 <tr key={reservation._id}>
                   <td>
                     {reservation.firstName} {reservation.lastName}
@@ -306,6 +350,56 @@ const Admin = () => {
               ))}
             </tbody>
           </table>
+          
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="pagination-container">
+              <div className="pagination-info">
+                Showing {startIndex + 1} to {Math.min(endIndex, filteredReservations.length)} of {filteredReservations.length} entries
+              </div>
+              <div className="pagination-controls">
+                <button
+                  className="pagination-btn"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </button>
+                
+                <div className="pagination-pages">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    // Show first page, last page, current page, and pages around current
+                    if (
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    ) {
+                      return (
+                        <button
+                          key={page}
+                          className={`pagination-page-btn ${currentPage === page ? 'active' : ''}`}
+                          onClick={() => handlePageChange(page)}
+                        >
+                          {page}
+                        </button>
+                      );
+                    } else if (page === currentPage - 2 || page === currentPage + 2) {
+                      return <span key={page} className="pagination-ellipsis">...</span>;
+                    }
+                    return null;
+                  })}
+                </div>
+                
+                <button
+                  className="pagination-btn"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
