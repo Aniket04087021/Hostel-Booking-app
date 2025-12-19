@@ -5,7 +5,14 @@ import "./Admin.css";
 
 const Admin = () => {
   const [reservations, setReservations] = useState([]);
+  const [filteredReservations, setFilteredReservations] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Filter states
+  const [filterYear, setFilterYear] = useState("");
+  const [filterMonth, setFilterMonth] = useState("");
+  const [filterDate, setFilterDate] = useState("");
+  const [filterName, setFilterName] = useState("");
 
   // Use environment variable or fallback to hosted backend
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://hostel-booking-app-3.onrender.com/api/v1";
@@ -24,6 +31,7 @@ const Admin = () => {
         withCredentials: true,
       });
       setReservations(data.reservations);
+      setFilteredReservations(data.reservations);
       setLoading(false);
     } catch (error) {
       console.error(error);
@@ -52,6 +60,69 @@ const Admin = () => {
     }
   };
 
+  // Get unique years from reservations
+  const getAvailableYears = () => {
+    const years = new Set();
+    reservations.forEach((reservation) => {
+      if (reservation.date) {
+        const year = new Date(reservation.date).getFullYear();
+        years.add(year);
+      }
+    });
+    return Array.from(years).sort((a, b) => b - a);
+  };
+
+  // Filter reservations based on selected criteria
+  useEffect(() => {
+    let filtered = [...reservations];
+
+    // Filter by year
+    if (filterYear) {
+      filtered = filtered.filter((reservation) => {
+        if (!reservation.date) return false;
+        const year = new Date(reservation.date).getFullYear();
+        return year.toString() === filterYear;
+      });
+    }
+
+    // Filter by month
+    if (filterMonth) {
+      filtered = filtered.filter((reservation) => {
+        if (!reservation.date) return false;
+        const month = new Date(reservation.date).getMonth() + 1; // getMonth() returns 0-11
+        return month.toString() === filterMonth;
+      });
+    }
+
+    // Filter by date
+    if (filterDate) {
+      filtered = filtered.filter((reservation) => {
+        if (!reservation.date) return false;
+        const reservationDate = new Date(reservation.date).toISOString().split('T')[0];
+        return reservationDate === filterDate;
+      });
+    }
+
+    // Filter by name
+    if (filterName) {
+      const searchTerm = filterName.toLowerCase();
+      filtered = filtered.filter((reservation) => {
+        const fullName = `${reservation.firstName} ${reservation.lastName}`.toLowerCase();
+        return fullName.includes(searchTerm);
+      });
+    }
+
+    setFilteredReservations(filtered);
+  }, [reservations, filterYear, filterMonth, filterDate, filterName]);
+
+  // Clear all filters
+  const clearFilters = () => {
+    setFilterYear("");
+    setFilterMonth("");
+    setFilterDate("");
+    setFilterName("");
+  };
+
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case "accepted":
@@ -78,9 +149,96 @@ const Admin = () => {
         <p>Manage all restaurant reservation requests</p>
       </div>
 
+      {/* Filters Section */}
+      {reservations.length > 0 && (
+        <div className="filters-container">
+          <div className="filters-header">
+            <h2>Filters</h2>
+            <button className="btn-clear-filters" onClick={clearFilters}>
+              Clear All
+            </button>
+          </div>
+          <div className="filters-grid">
+            <div className="filter-group">
+              <label htmlFor="filter-year">Year</label>
+              <select
+                id="filter-year"
+                value={filterYear}
+                onChange={(e) => setFilterYear(e.target.value)}
+                className="filter-select"
+              >
+                <option value="">All Years</option>
+                {getAvailableYears().map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <label htmlFor="filter-month">Month</label>
+              <select
+                id="filter-month"
+                value={filterMonth}
+                onChange={(e) => setFilterMonth(e.target.value)}
+                className="filter-select"
+              >
+                <option value="">All Months</option>
+                <option value="1">January</option>
+                <option value="2">February</option>
+                <option value="3">March</option>
+                <option value="4">April</option>
+                <option value="5">May</option>
+                <option value="6">June</option>
+                <option value="7">July</option>
+                <option value="8">August</option>
+                <option value="9">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <label htmlFor="filter-date">Date</label>
+              <input
+                id="filter-date"
+                type="date"
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+                className="filter-input"
+              />
+            </div>
+
+            <div className="filter-group">
+              <label htmlFor="filter-name">Name</label>
+              <input
+                id="filter-name"
+                type="text"
+                placeholder="Search by name..."
+                value={filterName}
+                onChange={(e) => setFilterName(e.target.value)}
+                className="filter-input"
+              />
+            </div>
+          </div>
+          <div className="filter-results-count">
+            Showing {filteredReservations.length} of {reservations.length} reservations
+          </div>
+        </div>
+      )}
+
       {reservations.length === 0 ? (
         <div className="no-reservations">
           <p>No reservations found</p>
+        </div>
+      ) : filteredReservations.length === 0 ? (
+        <div className="no-reservations">
+          <p>No reservations match the selected filters</p>
+          <button className="btn-clear-filters" onClick={clearFilters} style={{ marginTop: '10px' }}>
+            Clear Filters
+          </button>
         </div>
       ) : (
         <div className="reservations-table-container">
@@ -97,7 +255,7 @@ const Admin = () => {
               </tr>
             </thead>
             <tbody>
-              {reservations.map((reservation) => (
+              {filteredReservations.map((reservation) => (
                 <tr key={reservation._id}>
                   <td>
                     {reservation.firstName} {reservation.lastName}
